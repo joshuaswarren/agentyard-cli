@@ -1,9 +1,9 @@
-Agentyard
+Agentyard CLI
 =========
 
-# agentyard
+# agentyard cli 
 
-**Agentyard** is a workflow orchestration system designed for developers working with AI coding assistants. Born from real-world experience managing many concurrent AI coding sessions, it provides the infrastructure layer between human developers and AI agents. The system creates isolated, disposable workspaces for each coding task, automatically integrates with Claude Code and other AI assistants, and maintains clean git hygiene through its one-worktree-per-branch architecture. Whether you're exploring agentic coding patterns, building AI-powered development workflows, or scaling AI-assisted engineering across teams, Agentyard provides practical tools for managing AI-enhanced development workflows. This is workspace-as-code for the AI era.
+**Agentyard CLI** is a workflow orchestration system designed for developers working with AI coding assistants. Born from real-world experience managing many concurrent AI coding sessions, it provides the infrastructure layer between human developers and AI agents. The system creates isolated, disposable workspaces for each coding task, automatically integrates with Claude Code and other AI assistants, and maintains clean git hygiene through its one-worktree-per-branch architecture. Whether you're exploring agentic coding patterns, building AI-powered development workflows, or scaling AI-assisted engineering across teams, Agentyard provides practical tools for managing AI-enhanced development workflows. This is workspace-as-code for the AI era.
 
 ## Shell setup
 
