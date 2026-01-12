@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# sesh-pick <slug> – fuzzy‑find a tmux session containing <slug>
+# sesh-pick <slug> – fuzzy‑find a zellij session containing <slug>
 set -euo pipefail
 [[ $# -gt 0 ]] || { echo "Usage: sesh-pick <slug>" >&2; exit 1; }
-exec sesh connect "$(sesh list | grep "$1" | fzf)"
+exec zellij attach "$(zellij list-sessions --short | grep -F "$1" | fzf)"

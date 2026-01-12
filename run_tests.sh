@@ -44,7 +44,7 @@ test_case "Claude Code install" "grep -q 'npm install -g @anthropic-ai/claude-co
 test_case "Log directory creation" "grep -q 'mkdir -p \"\$log_dir\"' bin/starttask"
 test_case "Branch sanitization" "grep -q 'tr ./.._' bin/starttask"
 test_case "Active tasks update" "grep -q 'active_tasks_file=' bin/starttask"
-test_case "Tmux pipe configuration" "grep -q 'tmux pipe-pane' bin/starttask"
+test_case "Zellij logging configuration" "grep -q 'script -qf' bin/starttask"
 test_case "Claude launch command" "grep -q 'claude --dangerously-skip-permissions' bin/starttask"
 
 # Test 3: Check finishtask modifications

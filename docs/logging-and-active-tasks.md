@@ -24,7 +24,7 @@ When you run `starttask`, logging begins immediately:
    - Unique name prevents conflicts
 
 3. **What Gets Logged**
-   - All terminal output from the tmux session
+   - All terminal output from the zellij session
    - Claude Code interactions
    - Command executions and their output
    - Git operations
@@ -33,13 +33,13 @@ When you run `starttask`, logging begins immediately:
 
 ### How Logging Works
 
-The logging mechanism uses tmux's `pipe-pane` feature:
+The logging mechanism uses `script -qf` to capture pane output:
 
 ```bash
-tmux pipe-pane -o "cat >> '/path/to/logfile'"
+script -qf "/path/to/logfile" -c "<command>"
 ```
 
-This captures everything displayed in the tmux pane and appends it to the log file in real-time.
+This captures everything displayed in the zellij pane and appends it to the log file in real-time.
 
 ### Viewing Logs
 
@@ -142,17 +142,17 @@ deckard-003 (feature/api-update)
   Session: ✗ Not found (needs cleanup)
 ```
 
-#### Direct Tmux Commands
+#### Direct Zellij Commands
 
-See all tmux sessions:
+See all zellij sessions:
 ```bash
 # List all sessions
-tmux ls
+zellij list-sessions --short
 
 # Output example:
-myapp-001: 1 windows (created Sat Jan 20 10:30:15 2024) [80x24]
-myapp-002: 1 windows (created Sat Jan 20 14:22:03 2024) [80x24]
-deckard-003: 1 windows (created Sun Jan 21 09:15:42 2024) [80x24]
+myapp-001
+myapp-002
+deckard-003
 ```
 
 #### Using Jump Commands
@@ -205,7 +205,7 @@ grep -A5 "project: myapp" ~/agentyard/state/active-tasks.txt
 
 ### Synchronizing Task State
 
-Sometimes the active tasks file can get out of sync (e.g., if tmux sessions were killed manually). Use:
+Sometimes the active tasks file can get out of sync (e.g., if zellij sessions were killed manually). Use:
 
 ```bash
 sync-active-tasks
@@ -213,7 +213,7 @@ sync-active-tasks
 
 This command:
 - Checks each task in the file
-- Verifies tmux session exists
+- Verifies zellij session exists
 - Verifies worktree exists
 - Removes entries for non-existent tasks
 - Reports what was cleaned up
@@ -228,8 +228,8 @@ grep -B1 -A4 "branch: feature/user-auth" ~/agentyard/state/active-tasks.txt
 
 #### List Tasks by Age
 ```bash
-# Sort sessions by creation time
-tmux ls -F "#{session_created} #{session_name}" | sort -n | awk '{print $2}'
+# List sessions with creation timestamps
+zellij list-sessions --no-formatting
 ```
 
 #### Check Worktree Status
@@ -260,8 +260,7 @@ When Claude Code is running in a session, it can:
 
 ```bash
 # Check what session it's in
-echo $TMUX
-tmux display-message -p '#S'
+echo $ZELLIJ_SESSION_NAME
 
 # View its own log
 tail -n 100 ~/logs/${PROJECT}/${SESSION}-*.log
@@ -338,15 +337,15 @@ echo "Total active tasks: $(grep -c "session_name:" ~/agentyard/state/active-tas
 
 If logs aren't being created:
 1. Check `~/logs/<project>/` directory exists
-2. Verify tmux pipe-pane is active: `tmux show-options -p`
+2. Verify logging is active: `pgrep -fl "script -qf" | head -1`
 3. Check disk space: `df -h ~/logs`
 
 ### Stale Task Entries
 
-If tasks show in file but not in tmux:
+If tasks show in file but not in zellij:
 1. Run `sync-active-tasks`
 2. Manually verify worktree: `ls ~/work/<project>-wt/`
-3. Check tmux sessions: `tmux ls`
+3. Check zellij sessions: `zellij list-sessions --short`
 
 ### Log File Too Large
 

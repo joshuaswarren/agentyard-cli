@@ -7,16 +7,13 @@ Agentyard CLI
 
 ## Shell setup
 
-Put the *bin* folders from all three packs on your PATH and tell **tmuxp** where to find layouts.
+Put the *bin* folders from all three packs on your PATH. Zellij layouts are generated automatically by `starttask`.
 
 ```sh
 # Path – order matters: public first, then team, then private
 export PATH="$HOME/agentyard/bin:$HOME/agentyard-team/bin:$HOME/agentyard-private/bin:$PATH"
 
-# tmuxp scans these folders for *.yaml session files
-export TMUXP_CONFIGDIR="$HOME/agentyard/tmuxp:$HOME/agentyard-team/tmuxp:$HOME/agentyard-private/tmuxp"
-
-# (optional) sesh & zoxide hooks
+# (optional) zoxide hook
 eval "$(zoxide init zsh)"
 
 # For mentor command - OpenAI API key
@@ -44,7 +41,7 @@ setup-claude-commands.sh                    # Link Claude commands to ~/.claude/
 ## New Features
 
 ### Claude Code Integration
-- **Auto-launch**: `starttask` now automatically launches Claude Code in the tmux session
+- **Auto-launch**: `starttask` now automatically launches Claude Code in the zellij session
 - **Auto-install**: If Claude Code isn't installed, it will be installed automatically via npm
 - **Fallback**: If Claude Code fails to launch, the session falls back to a regular shell
 - **Direct Command Flags**: New `--plan`/`-p` and `--implement`/`-i` flags for immediate task execution:
@@ -54,7 +51,7 @@ setup-claude-commands.sh                    # Link Claude commands to ~/.claude/
   - Commands are sent automatically 3 seconds after session attachment
 
 ### Session Logging
-- All tmux session output is automatically logged to `~/logs/<project>/<session>-<branch>.log`
+- All zellij session output is automatically logged to `~/logs/<project>/<session>-<branch>.log`
 - Branch names with slashes are sanitized (e.g., `feature/ui` becomes `feature_ui` in the log filename)
 - Logging continues even if you exit Claude Code and return to the shell
 - Log files are preserved after `finishtask` for future reference
@@ -62,7 +59,7 @@ setup-claude-commands.sh                    # Link Claude commands to ~/.claude/
 ### Active Tasks Tracking
 - All active tasks are tracked in `~/agentyard/state/active-tasks.txt` (YAML format)
 - Use `list-tasks` to see all active sessions with their details
-- Use `sync-active-tasks` to recover from manual tmux kills or sync the state file
+- Use `sync-active-tasks` to recover from manual zellij kills or sync the state file
 - The tracking file is automatically updated by `starttask`, `finishtask`, and `cleanup-worktrees`
 
 ### AI-Powered PR Reviews with Judge

@@ -47,9 +47,9 @@ run_test "Contains -p short flag" "$result"
 grep -q -- "-i)" bin/starttask && result="true" || result="false"
 run_test "Contains -i short flag" "$result"
 
-# Test 6: Check for tmux send-keys
-grep -q "tmux send-keys" bin/starttask && result="true" || result="false"
-run_test "Contains tmux send-keys" "$result"
+# Test 6: Check for zellij write-chars
+grep -q "zellij --session.*action write-chars" bin/starttask && result="true" || result="false"
+run_test "Contains zellij write-chars" "$result"
 
 # Test 7: Check for sleep delay
 grep -q "sleep 3" bin/starttask && result="true" || result="false"

@@ -8,7 +8,7 @@
 #   • Removing worktrees whose branches are fully merged
 #   • Cleaning up orphaned worktree directories
 #   • Pruning stale worktree references
-#   • Removing associated tmuxp configs and tmux sessions
+#   • Removing associated zellij layouts and zellij sessions
 #
 # Options:
 #   --dry-run    Show what would be removed without actually removing
@@ -99,38 +99,38 @@ is_branch_merged() {
   return 1
 }
 
-# Get tmux session name for a worktree
+# Get zellij session name for a worktree
 get_session_name() {
   local project="$1"
   local slug="$2"
   echo "${project}-${slug}"
 }
 
-# Kill tmux session if it exists
-kill_tmux_session() {
+# Kill zellij session if it exists
+kill_zellij_session() {
   local session="$1"
-  if tmux has-session -t "$session" 2>/dev/null; then
+  if zellij list-sessions --short 2>/dev/null | grep -Fxq "$session"; then
     if [[ "$DRY_RUN" == true ]]; then
-      log_action "kill tmux session" "$session"
+      log_action "kill zellij session" "$session"
     else
-      tmux kill-session -t "$session" 2>/dev/null || true
-      log_action "Killed tmux session" "$session"
+      zellij kill-session "$session" 2>/dev/null || true
+      log_action "Killed zellij session" "$session"
     fi
   fi
 }
 
-# Remove tmuxp config if it exists
-remove_tmuxp_config() {
+# Remove zellij layout if it exists
+remove_zellij_layout() {
   local project="$1"
   local slug="$2"
-  local config="$HOME/agentyard/tmuxp/private/${project}-${slug}.yaml"
+  local config="$HOME/agentyard/zellij/layouts/private/${project}-${slug}.kdl"
   
   if [[ -f "$config" ]]; then
     if [[ "$DRY_RUN" == true ]]; then
-      log_action "remove tmuxp config" "$config"
+      log_action "remove zellij layout" "$config"
     else
       rm -f "$config"
-      log_action "Removed tmuxp config" "$config"
+      log_action "Removed zellij layout" "$config"
     fi
   fi
 }
@@ -263,8 +263,8 @@ for project_wt in "$HOME/work"/*-wt; do
       
       if [[ "$DRY_RUN" == true ]]; then
         log_action "remove worktree" "$worktree_dir" "$merge_status"
-        kill_tmux_session "$session_name"
-        remove_tmuxp_config "$project_name" "$slug"
+        kill_zellij_session "$session_name"
+        remove_zellij_layout "$project_name" "$slug"
       else
         # Remove the worktree
         if git -C "$main_repo" worktree remove "$worktree_dir" --force 2>/dev/null; then
@@ -272,8 +272,8 @@ for project_wt in "$HOME/work"/*-wt; do
           ((removed_count++))
           
           # Clean up associated resources
-          kill_tmux_session "$session_name"
-          remove_tmuxp_config "$project_name" "$slug"
+          kill_zellij_session "$session_name"
+          remove_zellij_layout "$project_name" "$slug"
           remove_from_active_tasks "$project_name" "$slug"
         else
           log_error "Failed to remove worktree $worktree_dir"

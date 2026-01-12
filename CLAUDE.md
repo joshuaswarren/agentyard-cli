@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Agentyard is a lightweight toolbelt for managing multiple AI coding sessions using tmux. It follows a three-folder architecture to separate public, team, and private work:
+Agentyard is a lightweight toolbelt for managing multiple AI coding sessions using zellij. It follows a three-folder architecture to separate public, team, and private work:
 
 - `~/agentyard` - Public core scripts and documentation
 - `~/agentyard-team` - Team-specific configurations (private repo)
@@ -14,14 +14,14 @@ Agentyard is a lightweight toolbelt for managing multiple AI coding sessions usi
 
 ### Creating Work Sessions
 ```bash
-# Create a new disposable git worktree + tmux session with Claude Code
+# Create a new disposable git worktree + zellij session with Claude Code
 starttask <project> <branch> [slug]
 
 # Examples:
 starttask deckard feature/cleanup          # Creates deckard-001 (auto-numbered)
 starttask deckard bugfix/login-issue 007   # Creates deckard-007 (explicit slug)
 
-# Clean up when task is complete (run inside the tmux session)
+# Clean up when task is complete (run inside the zellij session)
 finishtask
 
 # Weekly cleanup - remove merged worktrees (run on Monday/Friday)
@@ -42,11 +42,11 @@ Each worktree is single-branch and disposable. The `starttask` command always cr
 jump-<project>              # Uses fuzzy finder to select session
 
 # General session picker
-sesh-pick <slug>           # Find any tmux session containing <slug>
+sesh-pick <slug>           # Find any zellij session containing <slug>
 
-# Direct tmux commands
-tmux ls                    # List all sessions
-tmux attach -t <session>   # Attach to specific session
+# Direct zellij commands
+zellij list-sessions --short  # List all sessions
+zellij attach <session>       # Attach to specific session
 ```
 
 ### Claude Command Setup
@@ -74,8 +74,8 @@ cd mcp && ./start-docker.sh
 1. **starttask** (`bin/starttask`)
    - Creates numbered git worktrees under `~/work/<project>-wt/<slug>/`
    - Always creates fresh branch from origin/main using `git switch -c`
-   - Generates tmuxp configuration in `~/agentyard/tmuxp/private/`
-   - Launches detached tmux session with Claude Code auto-launched
+   - Generates zellij layout in `~/agentyard/zellij/layouts/private/`
+   - Launches zellij session with Claude Code auto-launched
    - Logs all session output to `~/logs/<project>/<session>-<branch>.log`
    - Updates active tasks tracking in `~/agentyard/state/active-tasks.txt`
    - Auto-installs Claude Code if not present
@@ -83,30 +83,30 @@ cd mcp && ./start-docker.sh
    - Each worktree is disposable - one branch per worktree
 
 2. **finishtask** (`bin/finishtask`)
-   - Run from inside a tmux session created by starttask
+   - Run from inside a zellij session created by starttask
    - Checks for uncommitted changes (safety)
    - Removes the git worktree
    - Deletes the worktree directory
-   - Removes tmuxp config file
+   - Removes zellij layout file
    - Updates active tasks tracking file
-   - Kills the tmux session
+   - Kills the zellij session
    - Preserves log files for historical reference
 
 3. **cleanup-worktrees** (`bin/cleanup-worktrees`)
    - Weekly maintenance command for cleaning up old worktrees
    - Removes worktrees whose branches are fully merged
-   - Cleans up associated tmux sessions and tmuxp configs
+   - Cleans up associated zellij sessions and zellij layouts
    - Updates active tasks tracking file
    - `--dry-run` option to preview changes
    - `--all` option for interactive cleanup of unmerged worktrees
    - Runs git gc for maintenance after cleanup
 
 4. **Session Helpers**
-   - `sesh-pick`: Fuzzy finder for tmux sessions
+   - `sesh-pick`: Fuzzy finder for zellij sessions
    - `jump-<project>`: Project-specific session picker (auto-generated)
    - `list-tasks`: Display all active tasks with details
-   - `sync-active-tasks`: Sync active tasks file with actual tmux sessions and worktrees
-   - Depends on: sesh, fzf, tmux
+   - `sync-active-tasks`: Sync active tasks file with actual zellij sessions and worktrees
+   - Depends on: zellij, fzf
 
 5. **Claude Integration**
    - Command templates in `claude-commands/` directories
@@ -122,9 +122,9 @@ cd mcp && ./start-docker.sh
   ├── 002/                  # Second worktree
   └── ...
 
-~/agentyard/tmuxp/private/  # Session configurations
-  ├── <project>-001.yaml
-  ├── <project>-002.yaml
+~/agentyard/zellij/layouts/private/  # Session layouts
+  ├── <project>-001.kdl
+  ├── <project>-002.kdl
   └── ...
 
 ~/agentyard/state/          # State tracking
@@ -149,8 +149,7 @@ This approach prevents git index corruption and ensures clean starting points fo
 ## Dependencies
 
 - git 2.5+ (for worktree support)
-- tmux & tmuxp
-- sesh (tmux session manager)
+- zellij
 - fzf (fuzzy finder)
 - npm (for Claude Code installation)
 - Docker & docker-compose (for MCP servers)
@@ -163,11 +162,7 @@ Add to `~/.zshrc` or `~/.bashrc`:
 # Path - order matters: public, team, private
 export PATH="$HOME/agentyard/bin:$HOME/agentyard-team/bin:$HOME/agentyard-private/bin:$PATH"
 
-# tmuxp configuration directories
-export TMUXP_CONFIGDIR="$HOME/agentyard/tmuxp:$HOME/agentyard-team/tmuxp:$HOME/agentyard-private/tmuxp"
-
 # Optional enhancements
-eval "$(sesh init zsh)"     # or bash
 eval "$(zoxide init zsh)"   # or bash
 ```
 

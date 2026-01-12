@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Sync active-tasks.txt with actual tmux sessions and worktrees
+# Sync active-tasks.txt with actual zellij sessions and worktrees
 set -euo pipefail
 
 state_dir="$HOME/agentyard/state"
@@ -7,10 +7,10 @@ mkdir -p "$state_dir"
 active_tasks_file="$state_dir/active-tasks.txt"
 temp_file=$(mktemp)
 
-echo "🔄 Syncing active tasks with tmux sessions and worktrees..."
+echo "🔄 Syncing active tasks with zellij sessions and worktrees..."
 
-# Get all tmux sessions matching our pattern
-tmux_sessions=$(tmux list-sessions -F '#S' 2>/dev/null | grep -E '^[^-]+-[0-9]+$' || true)
+# Get all zellij sessions matching our pattern
+zellij_sessions=$(zellij list-sessions --short 2>/dev/null | grep -E '^[^-]+-[0-9]+$' || true)
 
 # Start with empty file
 > "$temp_file"
@@ -20,7 +20,7 @@ found_count=0
 missing_worktree_count=0
 
 # Check each session
-for session in $tmux_sessions; do
+for session in $zellij_sessions; do
   project="${session%-*}"
   slug="${session##*-}"
   worktree_dir="$HOME/work/${project}-wt/$slug"
@@ -51,7 +51,7 @@ for session in $tmux_sessions; do
   fi
 done
 
-# Check for orphaned worktrees (worktrees without tmux sessions)
+# Check for orphaned worktrees (worktrees without zellij sessions)
 orphaned_count=0
 for project_wt in "$HOME/work"/*-wt; do
   [[ -d "$project_wt" ]] || continue
@@ -64,9 +64,9 @@ for project_wt in "$HOME/work"/*-wt; do
     slug=$(basename "$worktree_dir")
     session_name="${project_name}-${slug}"
     
-    # Check if tmux session exists
-    if ! tmux has-session -t "$session_name" 2>/dev/null; then
-      echo "  ⚠️  Worktree $worktree_dir has no tmux session"
+    # Check if zellij session exists
+    if ! zellij list-sessions --short 2>/dev/null | grep -Fxq "$session_name"; then
+      echo "  ⚠️  Worktree $worktree_dir has no zellij session"
       ((orphaned_count++))
     fi
   done

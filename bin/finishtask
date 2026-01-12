@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 #
-# finishtask  –  clean up a disposable worktree and tmux session
+# finishtask  –  clean up a disposable worktree and zellij session
 #
 # Usage:  finishtask
 #
-# Run this command from inside a tmux session created by starttask.
+# Run this command from inside a zellij session created by starttask.
 # It will:
 #   • Detect the current worktree directory
 #   • Remove the git worktree (after safety checks)
 #   • Delete the worktree directory
-#   • Remove the tmuxp config file
-#   • Kill the current tmux session
+#   • Remove the zellij layout file
+#   • Kill the current zellij session
 #
 # Safety: Won't proceed if there are uncommitted changes
 #
@@ -18,14 +18,14 @@ set -euo pipefail
 
 prog=$(basename "$0")
 
-# ---- Detect if we're in a tmux session --------------------------------------
-if [[ -z "${TMUX:-}" ]]; then
-  echo "Error: finishtask must be run from inside a tmux session created by starttask" >&2
+# ---- Detect if we're in a zellij session ------------------------------------
+if [[ -z "${ZELLIJ_SESSION_NAME:-}" ]]; then
+  echo "Error: finishtask must be run from inside a zellij session created by starttask" >&2
   exit 1
 fi
 
 # ---- Get current session name -----------------------------------------------
-session_name=$(tmux display-message -p '#S')
+session_name="$ZELLIJ_SESSION_NAME"
 
 # ---- Validate session name format -------------------------------------------
 if [[ ! "$session_name" =~ ^[^-]+(-[^-]+)*-[0-9]+$ ]]; then
@@ -87,11 +87,11 @@ main_repo="$HOME/work/$project"
 git -C "$main_repo" worktree remove "$expected_wt_dir" --force \
   || { echo "Error: Failed to remove worktree" >&2; exit 1; }
 
-# ---- Clean up tmuxp config --------------------------------------------------
-tmuxp_config="$HOME/agentyard/tmuxp/private/${project}-${slug}.yaml"
-if [[ -f "$tmuxp_config" ]]; then
-  echo "Removing tmuxp config..."
-  rm -f "$tmuxp_config"
+# ---- Clean up zellij layout -------------------------------------------------
+zellij_layout="$HOME/agentyard/zellij/layouts/private/${project}-${slug}.kdl"
+if [[ -f "$zellij_layout" ]]; then
+  echo "Removing zellij layout..."
+  rm -f "$zellij_layout"
 fi
 
 # ---- Remove task from active tasks file -------------------------------------
@@ -124,19 +124,8 @@ Remember to:
   - Delete the remote branch after merge
 EOF
 
-# ---- Kill tmux session ------------------------------------------------------
+# ---- Kill zellij session ----------------------------------------------------
 echo ""
-echo "Detaching from tmux session..."
-# We need to detach first if we're inside the session we're killing
-if [[ "$(tmux display-message -p '#S')" == "$session_name" ]]; then
-  # Small delay to ensure message is visible
-  sleep 1
-  # Detach from tmux first, then kill the session
-  # This prevents tmux from auto-switching to another session
-  tmux detach-client
-  # Kill the session after detaching (this runs in the parent shell)
-  tmux kill-session -t "$session_name" 2>/dev/null || true
-else
-  # We're in a different session, just kill it
-  tmux kill-session -t "$session_name"
-fi
+echo "Closing zellij session..."
+sleep 1
+zellij kill-session "$session_name" 2>/dev/null || true

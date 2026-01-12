@@ -2,18 +2,18 @@
 
 ## Overview
 
-The `starttask` and `finishtask` commands form the core of Agentyard's ephemeral development workflow. They provide a streamlined way to create isolated development environments for each task, with automatic git worktree management, tmux session creation, and Claude Code integration.
+The `starttask` and `finishtask` commands form the core of Agentyard's ephemeral development workflow. They provide a streamlined way to create isolated development environments for each task, with automatic git worktree management, zellij session creation, and Claude Code integration.
 
 ## Core Concepts
 
 ### Ephemeral Worktrees
-- **One task = One worktree = One branch = One tmux session**
+- **One task = One worktree = One branch = One zellij session**
 - Each worktree is disposable and single-purpose
 - Always starts fresh from origin/main
 - Never reused after task completion
 
 ### Automatic Session Management
-- Tmux sessions are automatically created and configured
+- Zellij sessions are automatically created and configured
 - Claude Code launches automatically in each session
 - All session output is logged for future reference
 - Sessions persist across network disconnections
@@ -49,13 +49,13 @@ starttask <project> <branch> [slug] [--plan|-p [issue] [message]] [--implement|-
    - Then creates fresh branch using `git switch -c <branch> <base>`
    - Avoids checkout conflicts by using detached HEAD approach
 
-3. **Generates tmuxp configuration**
-   - Creates YAML config in `~/agentyard/tmuxp/private/`
-   - Configures windows and panes for optimal workflow
+3. **Generates zellij layout**
+   - Creates KDL layout in `~/agentyard/zellij/layouts/private/`
+   - Configures pane titles and layout for the task session
    - Sets up Claude Code auto-launch with --dangerously-skip-permissions flag
-   - Configures automatic session logging via tmux pipe-pane
+   - Configures automatic session logging via `script -qf`
 
-4. **Launches tmux session**
+4. **Launches zellij session**
    - Session name: `<project>-<slug>`
    - Runs in detached mode initially
    - Automatically starts Claude Code
@@ -69,7 +69,7 @@ starttask <project> <branch> [slug] [--plan|-p [issue] [message]] [--implement|-
 
 6. **Creates helpers**
    - Auto-generates `jump-<project>` command on first use
-   - Uses sesh + fzf for fuzzy project session selection
+   - Uses zellij + fzf for fuzzy project session selection
 
 7. **Sends Claude commands (if flags provided)**
    - Waits 3 seconds after session attachment to ensure Claude Code is ready
@@ -106,10 +106,10 @@ starttask myapp refactor/cleanup -i "improve error handling"
 ```
 ✔ Disposable worktree created: /Users/username/work/deckard-wt/003
 ✔ Fresh branch: feature/api-update (from origin/main)
-✔ tmux session: deckard-003 (detached)
+✔ zellij session: deckard-003
 
 When done with this task:
-  finishtask        # (run inside the tmux session)
+  finishtask        # (run inside the zellij session)
 
 Attaching to session...
 ```
@@ -122,13 +122,13 @@ finishtask
 ```
 
 ### Prerequisites
-- Must be run from inside a tmux session created by `starttask`
+- Must be run from inside a zellij session created by `starttask`
 - Checks for uncommitted changes before proceeding
 
 ### What Finishtask Does
 
 1. **Session validation**
-   - Verifies you're in a tmux session
+   - Verifies you're in a zellij session
    - Validates session name format (project-slug)
    - Confirms you're in the expected worktree directory
 
@@ -144,14 +144,14 @@ finishtask
    - Deletes the worktree directory
 
 4. **Removes configuration**
-   - Deletes tmuxp YAML file
+   - Deletes zellij layout file
    - Updates active tasks tracking file (removes current session)
    - Uses awk to cleanly remove multi-line YAML entries
 
 5. **Ends session**
    - Shows success message with branch and commit info
-   - Detaches from tmux before killing (prevents auto-switch)
-   - Kills the tmux session
+   - Closes the zellij session
+   - Kills the zellij session
    - Preserves log files for history
 
 ### Safety Features
@@ -170,7 +170,7 @@ starttask myproject feature/add-search
 ### 2. Work in the session
 ```bash
 # Either attach immediately
-tmux attach -t myproject-001
+zellij attach myproject-001
 
 # Or use the jump command
 jump-myproject
@@ -189,7 +189,7 @@ jump-myproject
 
 ### 4. Complete the task
 ```bash
-# Inside the tmux session
+# Inside the zellij session
 finishtask
 ```
 
@@ -208,7 +208,7 @@ All sessions are automatically logged to:
 
 Features:
 - Branch names with slashes are converted to underscores in filenames
-- Logs capture all terminal output via `tmux pipe-pane`
+- Logs capture all terminal output via `script -qf`
 - Log files are created immediately when session starts
 - Logs persist even after `finishtask` for historical reference
 
@@ -306,14 +306,14 @@ starttask myapp issue-123
 
 ### 5. Session Management
 - Use `jump-<project>` for quick switching
-- Detach with `Ctrl-B D` (default tmux)
-- Reattach with `tmux attach -t <session>`
+- Detach with your zellij binding (default: `Ctrl o` then `d`)
+- Reattach with `zellij attach <session>`
 
 ## Troubleshooting
 
 ### Common Issues
 
-**"Not in a tmux session created by starttask"**
+**"Not in a zellij session created by starttask"**
 - Ensure you're running `finishtask` from inside the session
 - Check session name matches pattern: `<project>-<number>`
 
@@ -345,9 +345,9 @@ git worktree remove ~/work/<project>-wt/<slug>
 rm -rf ~/work/<project>-wt/<slug>
 ```
 
-**Orphaned tmux session:**
+**Orphaned zellij session:**
 ```bash
-tmux kill-session -t <project>-<slug>
+zellij kill-session <project>-<slug>
 ```
 
 **Fix task tracking:**
@@ -359,7 +359,7 @@ sync-active-tasks
 
 ### File Locations
 - Worktrees: `~/work/<project>-wt/<slug>/`
-- Configs: `~/agentyard/tmuxp/private/<project>-<slug>.yaml`
+- Configs: `~/agentyard/zellij/layouts/private/<project>-<slug>.kdl`
 - Logs: `~/logs/<project>/<project>-<slug>-<branch>.log`
 - State: `~/agentyard/state/active-tasks.txt`
 
@@ -381,20 +381,25 @@ sync-active-tasks
 ```
 
 ### Environment Variables
-- `TMUX`: Set when inside tmux session
-- `TMUX_PANE`: Current pane identifier
+- `ZELLIJ_SESSION_NAME`: Set when inside a zellij session
 - Standard git environment in worktree
 
-### Tmuxp Configuration Generated
-```yaml
-session_name: <project>-<slug>
-start_directory: ~/work/<project>-wt/<slug>
-windows:
-  - window_name: <project>
-    panes:
-      - shell_command:
-          - tmux pipe-pane -o "cat >> '<log_file>'"
-          - claude --dangerously-skip-permissions || exec $SHELL -l
+### Zellij Layout Generated
+```kdl
+layout {
+    cwd "~/work/<project>-wt/<slug>"
+    tab name="<project>" focus=true {
+        pane size=1 borderless=true {
+            plugin location="zellij:tab-bar"
+        }
+        pane name="claude" focus=true command="bash" {
+            args "-lc" "script -qf \"<log_file>\" -c 'claude --dangerously-skip-permissions || exec $SHELL -l'"
+        }
+        pane size=1 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+}
 ```
 
 The `|| exec $SHELL -l` fallback ensures you get a shell if Claude Code fails to start.

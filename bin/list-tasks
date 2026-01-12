@@ -33,5 +33,5 @@ awk '/^- session_name:/ {
 }' "$active_tasks_file" | sort
 
 echo ""
-echo "Use 'tmux attach -t <session>' to connect to a session"
+echo "Use 'zellij attach <session>' to connect to a session"
 echo "Use 'jump-<project>' for project-specific session picker"
