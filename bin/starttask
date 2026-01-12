@@ -159,11 +159,26 @@ fi
 mkdir -p "$wt_root" "$zellij_layout_dir"
 
 # ---- auto‑generate numeric slug ---------------------------------------------
+existing_sessions=$(zellij list-sessions --short 2>/dev/null || true)
+
 if [[ -z $slug ]]; then
   last=$(find "$wt_root" -maxdepth 1 -type d \
            -regex ".*/[0-9][0-9][0-9]" | xargs -I {} basename {} | sort -n | tail -1 || true)
   next=$(( 10#${last:-0} + 1 ))
-  slug=$(printf "%03d" "$next")
+
+  while :; do
+    candidate=$(printf "%03d" "$next")
+    if [[ -e "$wt_root/$candidate" ]]; then
+      next=$((next + 1))
+      continue
+    fi
+    if printf "%s\n" "$existing_sessions" | grep -Fxq "${project}-${candidate}"; then
+      next=$((next + 1))
+      continue
+    fi
+    slug="$candidate"
+    break
+  done
 fi
 
 worktree_dir="$wt_root/$slug"
@@ -171,8 +186,16 @@ layout_file="$zellij_layout_dir/${project}-${slug}.kdl"
 session_name="${project}-${slug}"
 
 # ---- check for existing session name ----------------------------------------
-if zellij list-sessions --short 2>/dev/null | grep -Fxq "$session_name"; then
+if printf "%s\n" "$existing_sessions" | grep -Fxq "$session_name"; then
   echo "Error: zellij session '$session_name' already exists." >&2
+  echo "Hint: attach with 'zellij attach $session_name' or pick a different slug." >&2
+  exit 1
+fi
+
+# ---- check for existing worktree path ---------------------------------------
+if [[ -e "$worktree_dir" ]]; then
+  echo "Error: worktree path '$worktree_dir' already exists." >&2
+  echo "Hint: use a different slug or run finishtask to clean up." >&2
   exit 1
 fi
 
