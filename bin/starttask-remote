@@ -25,4 +25,5 @@ shift
 remote_cmd=$(printf '%q ' starttask "$@")
 remote_cmd=${remote_cmd% }
 
-exec ssh -t "$host" bash -lc "$remote_cmd"
+bootstrap_cmd='source ~/.zshrc 2>/dev/null || true; source ~/.bashrc 2>/dev/null || true; source ~/.bash_profile 2>/dev/null || true'
+exec ssh -t "$host" "$bootstrap_cmd; $remote_cmd"
