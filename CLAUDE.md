@@ -20,6 +20,9 @@ starttask <project> <branch> [slug]
 # Create and attach to a remote session (eg. macstudio)
 starttask-remote <host> <project> <branch> [slug]
 
+# List remote zellij sessions
+list-sessions-remote <host> [pattern]
+
 # Examples:
 starttask deckard feature/cleanup          # Creates deckard-001 (auto-numbered)
 starttask deckard bugfix/login-issue 007   # Creates deckard-007 (explicit slug)

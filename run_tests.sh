@@ -34,9 +34,11 @@ test_case() {
 test_case "list-tasks exists" "[[ -f bin/list-tasks ]]"
 test_case "sync-active-tasks exists" "[[ -f bin/sync-active-tasks ]]"
 test_case "starttask-remote exists" "[[ -f bin/starttask-remote ]]"
+test_case "list-sessions-remote exists" "[[ -f bin/list-sessions-remote ]]"
 test_case "list-tasks is executable" "[[ -x bin/list-tasks ]]"
 test_case "sync-active-tasks is executable" "[[ -x bin/sync-active-tasks ]]"
 test_case "starttask-remote is executable" "[[ -x bin/starttask-remote ]]"
+test_case "list-sessions-remote is executable" "[[ -x bin/list-sessions-remote ]]"
 
 # Test 2: Check starttask modifications
 echo ""

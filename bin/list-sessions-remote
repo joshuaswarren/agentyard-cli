@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# list-sessions-remote – list zellij sessions on a remote host
+# Usage: list-sessions-remote <host> [pattern]
+set -euo pipefail
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") <host> [pattern]
+
+Examples:
+  $(basename "$0") macstudio
+  $(basename "$0") macstudio deckard-
+EOF
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 1
+fi
+
+host=$1
+pattern=${2:-}
+
+remote_cmd="zellij list-sessions --short --no-formatting"
+if [[ -n "$pattern" ]]; then
+  pattern_q=$(printf '%q' "$pattern")
+  remote_cmd+=" | grep -F -- $pattern_q"
+fi
+
+bootstrap_cmd='source ~/.zshrc 2>/dev/null || true; source ~/.bashrc 2>/dev/null || true; source ~/.bash_profile 2>/dev/null || true'
+exec ssh "$host" "$bootstrap_cmd; $remote_cmd"
