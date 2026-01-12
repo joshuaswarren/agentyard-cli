@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# starttask-remote – run starttask on a remote host and attach to the session
+# Usage: starttask-remote <host> <project> <branch> [slug] [--plan|-p [issue] [message]] [--implement|-i [issue] [message]]
+set -euo pipefail
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") <host> <project> <branch> [slug] [--plan|-p [issue] [message]] [--implement|-i [issue] [message]]
+
+Examples:
+  $(basename "$0") macstudio deckard feature/new-ui
+  $(basename "$0") macstudio deckard bugfix/login-issue 007
+  $(basename "$0") macstudio deckard feature/auth -p 123
+EOF
+}
+
+if [[ $# -lt 3 ]]; then
+  usage
+  exit 1
+fi
+
+host=$1
+shift
+
+remote_cmd=$(printf '%q ' starttask "$@")
+remote_cmd=${remote_cmd% }
+
+exec ssh -t "$host" bash -lc "$remote_cmd"

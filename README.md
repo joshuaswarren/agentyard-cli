@@ -26,6 +26,7 @@ Add the lines above to ~/.zshrc (or ~/.bashrc), source the file, and you’re re
 starttask yourproject feature/new-feature   # create disposable worktree & session with Claude Code
 starttask yourproject bugfix/issue -p 123   # create session and send /plan command for issue #123
 starttask yourproject feature/auth --implement 456  # create session and implement issue #456
+starttask-remote macstudio yourproject feature/new-feature  # create/attach session on remote host
 jump-yourproject                            # fuzzy‑select a session
 finishtask                                  # clean up worktree when done (run inside session)
 cleanup-worktrees                           # weekly cleanup of merged worktrees

@@ -17,6 +17,9 @@ Agentyard is a lightweight toolbelt for managing multiple AI coding sessions usi
 # Create a new disposable git worktree + zellij session with Claude Code
 starttask <project> <branch> [slug]
 
+# Create and attach to a remote session (eg. macstudio)
+starttask-remote <host> <project> <branch> [slug]
+
 # Examples:
 starttask deckard feature/cleanup          # Creates deckard-001 (auto-numbered)
 starttask deckard bugfix/login-issue 007   # Creates deckard-007 (explicit slug)
