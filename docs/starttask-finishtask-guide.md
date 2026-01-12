@@ -53,7 +53,7 @@ starttask <project> <branch> [slug] [--plan|-p [issue] [message]] [--implement|-
    - Creates KDL layout in `~/agentyard/zellij/layouts/private/`
    - Configures pane titles and layout for the task session
    - Sets up Claude Code auto-launch with --dangerously-skip-permissions flag
-   - Configures automatic session logging via `script -qf`
+   - Configures automatic session logging via `script` (macOS: `-qF`, Linux: `-qf`)
 
 4. **Launches zellij session**
    - Session name: `<project>-<slug>`
@@ -208,7 +208,7 @@ All sessions are automatically logged to:
 
 Features:
 - Branch names with slashes are converted to underscores in filenames
-- Logs capture all terminal output via `script -qf`
+- Logs capture all terminal output via `script` (macOS: `-qF`, Linux: `-qf`)
 - Log files are created immediately when session starts
 - Logs persist even after `finishtask` for historical reference
 
@@ -393,7 +393,7 @@ layout {
             plugin location="zellij:tab-bar"
         }
         pane name="claude" focus=true command="bash" {
-            args "-lc" "script -qf \"<log_file>\" -c 'claude --dangerously-skip-permissions || exec $SHELL -l'"
+            args "-lc" "<script logging command>"
         }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"

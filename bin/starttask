@@ -226,6 +226,13 @@ log_file="$log_dir/${session_name}-${safe_branch}.log"
 # Create/truncate log file
 > "$log_file"
 
+# ---- choose script logging command ------------------------------------------
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  log_cmd="script -qF \\\"${log_file}\\\" bash -lc \\\"claude --dangerously-skip-permissions || exec \\$SHELL -l\\\""
+else
+  log_cmd="script -qf \\\"${log_file}\\\" -c \\\"bash -lc \\\\\\\"claude --dangerously-skip-permissions || exec \\\\\\$SHELL -l\\\\\\\"\\\""
+fi
+
 # ---- add task to active tasks file ------------------------------------------
 # Create state directory if needed
 state_dir="$HOME/agentyard/state"
@@ -252,7 +259,7 @@ layout {
             plugin location="zellij:tab-bar"
         }
         pane name="$session_name" focus=true command="bash" {
-            args "-lc" "script -qf \"${log_file}\" -c 'claude --dangerously-skip-permissions || exec \\$SHELL -l'"
+            args "-lc" "$log_cmd"
         }
         pane size=1 borderless=true {
             plugin location="zellij:status-bar"

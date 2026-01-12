@@ -33,9 +33,12 @@ When you run `starttask`, logging begins immediately:
 
 ### How Logging Works
 
-The logging mechanism uses `script -qf` to capture pane output:
+The logging mechanism uses `script` to capture pane output:
 
 ```bash
+# macOS
+script -qF "/path/to/logfile" bash -lc "<command>"
+# Linux (util-linux)
 script -qf "/path/to/logfile" -c "<command>"
 ```
 
@@ -337,7 +340,7 @@ echo "Total active tasks: $(grep -c "session_name:" ~/agentyard/state/active-tas
 
 If logs aren't being created:
 1. Check `~/logs/<project>/` directory exists
-2. Verify logging is active: `pgrep -fl "script -qf" | head -1`
+2. Verify logging is active: `pgrep -fl "script -q" | head -1`
 3. Check disk space: `df -h ~/logs`
 
 ### Stale Task Entries
