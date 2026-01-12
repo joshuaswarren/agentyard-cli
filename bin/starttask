@@ -298,4 +298,4 @@ if [[ -n "$claude_command" ]]; then
 fi
 
 # ---- attach to the zellij session -------------------------------------------
-exec zellij --session "$session_name" --layout "$layout_file"
+exec zellij --layout "$layout_file" attach -c "$session_name"
