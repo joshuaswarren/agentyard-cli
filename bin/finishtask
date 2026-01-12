@@ -28,6 +28,8 @@ fi
 session_name="$ZELLIJ_SESSION_NAME"
 
 # ---- Validate session name format -------------------------------------------
+# Session name should be: project-slug where project can contain dashes
+# and slug is a number (e.g., carlton-poc-001)
 if [[ ! "$session_name" =~ ^[^-]+(-[^-]+)*-[0-9]+$ ]]; then
   echo "Error: Current session '$session_name' doesn't match expected format (project-slug)" >&2
   echo "This command only works with sessions created by starttask" >&2
